@@ -15,17 +15,17 @@ const int HASH_LEN=33;        // Length of MD5 hash strings
 int tryguess(char *hash, char *guess)
 {
     // Hash the guess using MD5
-    char *p = md5(guess, strlen(guess));
+    char *g = md5(guess, strlen(guess));
     
     // Compare the two hashes
-    if (*hash == *p)
+    if (strcmp(hash, g) == 0)
     {
         // Free any malloc'd memory
-        free(p);
+        free(g);
         return 1;
     }
     // Free any malloc'd memory
-    free(p);
+    free(g);
     return 0;
 }
 
@@ -54,8 +54,6 @@ char **read_dictionary(char *filename, int *size)
     fclose(f);
     
     int count = 0;
-    char **arr = malloc(len * sizeof(char *));
-    arr[0] = contents;
     for (int i = 0; i < len; i++)
     {
         if (contents[i] == '\n')
@@ -65,7 +63,10 @@ char **read_dictionary(char *filename, int *size)
         }
     }
     
-    for (int i = 0, j = 1; i < len - 1; i++)
+    char **arr = malloc(len * sizeof(char *));
+    arr[0] = contents;
+    int j = 1;
+    for (int i = 0; i < len - 1; i++)
     {
         if (contents[i] == '\0')
         {
@@ -73,6 +74,7 @@ char **read_dictionary(char *filename, int *size)
             j++;
         }
     }
+    
     *size = count;
     return arr;
 }
@@ -104,7 +106,7 @@ int main(int argc, char *argv[])
     char line[HASH_LEN];
     while (fgets(line, HASH_LEN, h) != NULL)
     {
-        for (int i = 0; i < dlen - 1; i++)
+        for (int i = 0; i < dlen; i++)
         {
             if (tryguess(line, dict[i]) == 1)
             {
