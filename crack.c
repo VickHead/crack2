@@ -16,12 +16,11 @@ int tryguess(char *hash, char *guess)
 {
     // Hash the guess using MD5
     char *p = md5(guess, strlen(guess));
-    // Compare the two hashes
-    //printf("%s ", hash);
-    //printf("%s\n", p);
     
+    // Compare the two hashes
     if (*hash == *p)
     {
+        // Free any malloc'd memory
         free(p);
         return 1;
     }
@@ -42,25 +41,21 @@ char **read_dictionary(char *filename, int *size)
     if (stat(filename, &info) != -1)
     {
         len = info.st_size;
-        //printf("%d\n", len);
     }
     
     char *contents = malloc(len);
-    
     FILE *f = fopen(filename, "r");
     if (!f)
     {
         printf("can't open %s for reading\n", filename);
         exit(1);
     }
-    
     fread(contents, 1, len, f);
     fclose(f);
     
     int count = 0;
     char **arr = malloc(len * sizeof(char *));
     arr[0] = contents;
-    
     for (int i = 0; i < len; i++)
     {
         if (contents[i] == '\n')
@@ -70,20 +65,14 @@ char **read_dictionary(char *filename, int *size)
         }
     }
     
-    //printf("arr[%d] = ", 0);
-    //puts(arr[0]);
-    
-    for (int i = 0, j = 0; i < len; i++)
+    for (int i = 0, j = 1; i < len - 1; i++)
     {
         if (contents[i] == '\0')
         {
             arr[j] = &contents[i+1];
-            //printf("arr[%d] = ", j + 1);
-            //puts(arr[j]);
             j++;
         }
     }
-    
     *size = count;
     return arr;
 }
@@ -99,15 +88,13 @@ int main(int argc, char *argv[])
 
     // Read the dictionary file into an array of strings.
     int dlen;
-    char **dict = read_dictionary("rockyou100.txt", &dlen);
-    //printf("%d\n", dlen);
-    //printf("%s\n", *dict);
+    char **dict = read_dictionary(argv[2], &dlen);
 
     // Open the hash file for reading.
     FILE *h = fopen(argv[1], "r");
     if (!h)
     {
-        printf("Couldn't open hashes.txt for reading\n");
+        printf("Couldn't open %s for reading\n", argv[1]);
         exit(1);
     }
 
@@ -119,9 +106,6 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < dlen - 1; i++)
         {
-            //printf("%d ", tryguess(line, dict[i]));
-            //printf("%d ", i);
-            
             if (tryguess(line, dict[i]) == 1)
             {
                 printf("%s ", line);
@@ -131,7 +115,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    //free(dict[0]);
+    free(dict[0]);
     free(dict);
     fclose(h);
 }
